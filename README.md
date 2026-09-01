@@ -1,2 +1,4 @@
 # Asharaya
-my game
+my AAA game 
+Servivel , Multiplayer, Fantasy 
+all ages
