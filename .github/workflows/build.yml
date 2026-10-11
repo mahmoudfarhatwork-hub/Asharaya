@@ -1,0 +1,134 @@
+name: Build Asharaya (Android + PC)
+
+# يشتغل تلقائي كل ما تعمل push على main، أو تقدر تشغّله يدوي من تبويب Actions
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+env:
+  # لو مسار مشروع جودوت جوه الريبو مختلف، غيّر السطر ده بس
+  GODOT_PROJECT_DIR: godot_project_FINAL
+
+jobs:
+  npc-selftest:
+    name: NPC brain self-test
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.7.2-stable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: أول Import للمشروع (يبني كاش الكلاسات)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --editor --quit --path . || true
+
+      - name: اختبار عقل الـ NPCs (بدون واجهة)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/npc_selftest.gd
+
+      - name: اختبار أمن الشبكة (الهوية والتنضيف)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/net_security_selftest.gd
+
+      - name: اختبار نظام العملات
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/currency_selftest.gd
+
+  export-android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    # الصورة دي فيها Godot 4.7.2 + Android SDK + Java جاهزين بالكامل — مفيش حاجة تتظبط يدوي
+    container:
+      image: barichello/godot-ci:4.7.2-stable
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: نقل الـ Export Templates لمكانهم
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/4.7.2.stable ~/.local/share/godot/export_templates/4.7.2.stable
+
+      - name: أول Import للمشروع (يبني كاش المحرك)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --editor --quit --path . || true
+
+      - name: تصدير APK (Debug — كفاية للتجربة مع الأصحاب)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          mkdir -v -p builds/android
+          godot --headless --path . --export-debug "Android (Low-End)" builds/android/Asharaya.apk
+
+      - name: رفع الـ APK كملف تحمّله من صفحة الـ Action
+        uses: actions/upload-artifact@v4
+        with:
+          name: Asharaya-Android-APK
+          path: ${{ env.GODOT_PROJECT_DIR }}/builds/android/Asharaya.apk
+
+  export-pc:
+    name: Windows + Linux
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.7.2-stable
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: نقل الـ Export Templates لمكانهم
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/4.7.2.stable ~/.local/share/godot/export_templates/4.7.2.stable
+
+      - name: أول Import للمشروع
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --editor --quit --path . || true
+
+      - name: تصدير Windows
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          mkdir -v -p builds/windows
+          godot --headless --path . --export-release "Windows Desktop (Low-Spec)" builds/windows/Asharaya.exe
+
+      - name: تصدير Linux
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          mkdir -v -p builds/linux
+          godot --headless --path . --export-release "Linux Desktop" builds/linux/Asharaya.x86_64
+
+      - name: رفع نسخ الـ PC
+        uses: actions/upload-artifact@v4
+        with:
+          name: Asharaya-PC-Builds
+          path: |
+            ${{ env.GODOT_PROJECT_DIR }}/builds/windows/*
+            ${{ env.GODOT_PROJECT_DIR }}/builds/linux/*
+
+# ---------------------------------------------------------------------------
+# طريقة الاستخدام:
+# 1) حط الملف ده في مشروعك عند: .github/workflows/build.yml
+#    (يعني جوه الريبو نفسه، مش جوه مجلد جودوت — على مستوى الريبو الرئيسي)
+# 2) اعمل push على GitHub — الـ Action هيشتغل لوحده، وتقدر تتابعه من تبويب "Actions"
+# 3) لما يخلص (حوالي 5-10 دقايق)، هتلاقي الملفات جاهزة للتحميل تحت "Artifacts"
+#    في نفس صفحة الـ run — ملف APK جاهز للتثبيت + نسخ PC
+#
+# ملحوظة عن التوقيع: ده بيعمل Debug APK (كفاية بالظبط عشان تجرب وتلعب مع
+# أصحابك) — مش موقّع بمفتاح إصدار حقيقي، فمش تقدر تنزّله على Google Play.
+# لو محتاج نسخة موقّعة للنشر، محتاج keystore حقيقي تحطه كـ GitHub Secret —
+# قولي لو وصلت للمرحلة دي وأظبطهولك.
+# ---------------------------------------------------------------------------

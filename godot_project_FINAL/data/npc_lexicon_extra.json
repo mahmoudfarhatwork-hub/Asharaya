@@ -1,0 +1,15 @@
+{
+  "_help": "زوّد كلمات من غير ما تلمس الكود. المفاتيح: intent_words / intent_phrases / sets / items",
+  "intent_words": {
+    "greet": ["يا باشا", "يا فندم", "اهلين"],
+    "thanks": ["الله يكرمك"],
+    "ask_danger": ["مرعب"]
+  },
+  "intent_phrases": {
+    "ask_quest": ["محتاج اشتغل", "عايز اكسب فلوس"]
+  },
+  "sets": {
+    "polite": ["يا كريم"]
+  },
+  "items": {}
+}

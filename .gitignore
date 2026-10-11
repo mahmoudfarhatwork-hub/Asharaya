@@ -1,0 +1,14 @@
+# Godot
+.godot/
+*.translation
+builds/
+export_credentials.cfg
+# مفاتيح وأسرار: ماتتدفعش أبدًا للريبو
+.env
+*.keystore
+*.jks
+secrets/
+user_data/
+# أنظمة
+.DS_Store
+Thumbs.db
