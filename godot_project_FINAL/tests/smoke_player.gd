@@ -41,6 +41,31 @@ func _ready() -> void:
 	player.velocity = Vector3(0, 0, 8)
 	player._update_animation(Vector2(0, 1), true)
 	check(ap.current_animation == "ual/Jog_Fwd", "running -> Jog_Fwd (got %s)" % ap.current_animation)
+	# الهجوم: حركة Sword_Attack ما تتقاطعش بالمشي، وترجع لوحدها
+	player.play_action("Sword_Attack")
+	check(ap.current_animation == "ual/Sword_Attack", "attack plays Sword_Attack (got %s)" % ap.current_animation)
+	player.velocity = Vector3(0, 0, 5)
+	player._update_animation(Vector2(0, 1), false)
+	check(ap.current_animation == "ual/Sword_Attack", "walking does not interrupt the attack animation")
+	player._action_until = 0.0
+	player._update_animation(Vector2(0, 1), false)
+	check(ap.current_animation == "ual/Walk", "after the attack the player returns to Walk (got %s)" % ap.current_animation)
+	# الضربة: عدو قدّام اللاعب بياخد ضرر، وعدو وراه لأ
+	var slime: Node3D = main.get_node_or_null("Slime1")
+	var combat: Node = player.get_node_or_null("CombatSystem")
+	check(slime != null and combat != null, "scene has a slime and a CombatSystem")
+	if slime != null and combat != null:
+		player.rotation.y = 0.0
+		slime.global_position = player.global_position + Vector3(0, 0, 1.5)
+		var hp_before: int = slime.hp
+		combat._can_attack = true
+		combat.attack()
+		check(slime.hp < hp_before, "attack damages an enemy in front (hp %d -> %d)" % [hp_before, slime.hp])
+		slime.global_position = player.global_position + Vector3(0, 0, -1.5)
+		var hp_mid: int = slime.hp
+		combat._can_attack = true
+		combat.attack()
+		check(slime.hp == hp_mid, "attack does not hit an enemy behind the player")
 	_finish()
 
 

@@ -52,6 +52,16 @@ jobs:
           cd "$GODOT_PROJECT_DIR"
           godot --headless --path . --script res://tests/character_selftest.gd
 
+      - name: اختبار التحكم باللمس (التخطيط والمنطق)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/touch_selftest.gd
+
+      - name: اختبار اختيار هدف الضربة
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/combat_selftest.gd
+
       - name: اختبار تكامل اللاعب (مشهد كامل)
         run: |
           cd "$GODOT_PROJECT_DIR"

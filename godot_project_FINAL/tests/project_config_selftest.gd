@@ -10,6 +10,8 @@ func _initialize() -> void:
 	check(bool(ProjectSettings.get_setting("rendering/textures/vram_compression/import_etc2_astc", false)), "ETC2/ASTC texture import is enabled (required for Android export)")
 	var orient: Variant = ProjectSettings.get_setting("display/window/handheld/orientation", 1)
 	check(typeof(orient) == TYPE_INT and int(orient) == 0, "orientation is landscape (int 0)")
+	check(str(ProjectSettings.get_setting("display/window/stretch/mode", "")) == "canvas_items", "UI stretch is canvas_items (touch layout scales with the phone)")
+	check(str(ProjectSettings.get_setting("display/window/stretch/aspect", "")) == "expand", "stretch aspect is expand (wide phone screens)")
 	check(str(ProjectSettings.get_setting("application/config/name", "")) == "Asharaya", "project name is Asharaya")
 	var features: PackedStringArray = ProjectSettings.get_setting("application/config/features", PackedStringArray())
 	check("4.7" in features, "project feature tag is 4.7")

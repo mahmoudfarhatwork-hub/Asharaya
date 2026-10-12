@@ -71,6 +71,7 @@ static func create(monster_id: String, position: Vector3) -> Monster:
 
 
 func _ready() -> void:
+	add_to_group("monsters")
 	hp = max_hp
 	_spawn_position = global_position
 

@@ -23,6 +23,7 @@ const GRAVITY := 9.8
 
 
 func _ready() -> void:
+	add_to_group("monsters")
 	hp = max_hp
 	_spawn_position = global_position
 

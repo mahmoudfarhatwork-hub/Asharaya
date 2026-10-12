@@ -109,6 +109,7 @@ func _send_stats_to_server(_delta: float) -> void:
 var _anim_player: AnimationPlayer = null
 var _anim_searched := false
 var _current_anim_key := ""
+var _action_until := 0.0   # وقت (ثواني) لحد ما حركة الهجوم تخلّص
 
 
 func _update_animation(input_dir: Vector2, is_running: bool) -> void:
@@ -119,6 +120,8 @@ func _update_animation(input_dir: Vector2, is_running: bool) -> void:
 		_current_anim_key = ""
 	if _anim_player == null:
 		return
+	if Time.get_ticks_msec() / 1000.0 < _action_until:
+		return   # حركة هجوم شغالة، ما نقاطعهاش بالمشي
 	# حركات UAL (Quaternius): Idle / Walk / Jog / Jump بدل حركات Mixamo المؤقتة
 	if _anim_player.has_animation("ual/Idle"):
 		var picked := QuaterniusCharacter.pick(Vector2(velocity.x, velocity.z).length(), is_running, input_dir.y < -0.1, is_on_floor())
@@ -145,3 +148,18 @@ func _find_anim_player(node: Node) -> AnimationPlayer:
 		if f:
 			return f
 	return null
+
+
+# حركة لمرة واحدة (هجوم...). بترجع للمشي/الوقوف لوحدها لما تخلّص.
+func play_action(anim_name: String) -> void:
+	if _anim_player == null or not is_instance_valid(_anim_player):
+		var body := get_node_or_null("HumanBody")
+		_anim_player = _find_anim_player(body) if body else null
+	if _anim_player == null:
+		return
+	var full := "ual/" + anim_name
+	if not _anim_player.has_animation(full):
+		return
+	_anim_player.play(full, 0.1)
+	_action_until = Time.get_ticks_msec() / 1000.0 + _anim_player.get_animation(full).length
+	_current_anim_key = ""
