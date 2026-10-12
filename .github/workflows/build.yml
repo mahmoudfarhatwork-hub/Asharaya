@@ -15,7 +15,7 @@ jobs:
     name: NPC brain self-test
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.7.2-stable
+      image: barichello/godot-ci:4.7.2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,6 +52,11 @@ jobs:
           cd "$GODOT_PROJECT_DIR"
           godot --headless --path . --script res://tests/character_selftest.gd
 
+      - name: اختبار إعدادات الـ CI والتصدير
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/ci_config_selftest.gd
+
       - name: اختبار التحكم باللمس (التخطيط والمنطق)
         run: |
           cd "$GODOT_PROJECT_DIR"
@@ -72,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     # الصورة دي فيها Godot 4.7.2 + Android SDK + Java جاهزين بالكامل — مفيش حاجة تتظبط يدوي
     container:
-      image: barichello/godot-ci:4.7.2-stable
+      image: barichello/godot-ci:4.7.2
 
     steps:
       - name: Checkout
@@ -94,7 +99,7 @@ jobs:
         run: |
           cd "$GODOT_PROJECT_DIR"
           mkdir -v -p builds/android
-          godot --headless --path . --export-debug "Android (Low-End)" builds/android/Asharaya.apk
+          godot --headless --verbose --path . --export-debug "Android (Low-End)" builds/android/Asharaya.apk
 
       - name: رفع الـ APK كملف تحمّله من صفحة الـ Action
         uses: actions/upload-artifact@v4
@@ -106,7 +111,7 @@ jobs:
     name: Windows + Linux
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.7.2-stable
+      image: barichello/godot-ci:4.7.2
 
     steps:
       - name: Checkout
