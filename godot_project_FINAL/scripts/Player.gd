@@ -112,12 +112,17 @@ var _current_anim_key := ""
 
 
 func _update_animation(input_dir: Vector2, is_running: bool) -> void:
-	if not _anim_searched:
-		_anim_searched = true
+	# بنعيد البحث لو الجسم لسه ما اتركّبش أو اتبدّل (التركيب بيحصل بعد إنشاء الشخصية، مش وقت تحميل المشهد)
+	if _anim_player == null or not is_instance_valid(_anim_player):
 		var body := get_node_or_null("HumanBody")
-		if body:
-			_anim_player = _find_anim_player(body)
+		_anim_player = _find_anim_player(body) if body else null
+		_current_anim_key = ""
 	if _anim_player == null:
+		return
+	# حركات UAL (Quaternius): Idle / Walk / Jog / Jump بدل حركات Mixamo المؤقتة
+	if _anim_player.has_animation("ual/Idle"):
+		var picked := QuaterniusCharacter.pick(Vector2(velocity.x, velocity.z).length(), is_running, input_dir.y < -0.1, is_on_floor())
+		_current_anim_key = QuaterniusCharacter.play_pick(_anim_player, picked, _current_anim_key)
 		return
 	var key := "reload"
 	if input_dir.y < -0.1:

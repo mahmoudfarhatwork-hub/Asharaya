@@ -42,6 +42,21 @@ jobs:
           cd "$GODOT_PROJECT_DIR"
           godot --headless --path . --script res://tests/currency_selftest.gd
 
+      - name: اختبار إعدادات المشروع (أندرويد)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/project_config_selftest.gd
+
+      - name: اختبار شخصية Quaternius + حركات UAL
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . --script res://tests/character_selftest.gd
+
+      - name: اختبار تكامل اللاعب (مشهد كامل)
+        run: |
+          cd "$GODOT_PROJECT_DIR"
+          godot --headless --path . res://tests/smoke_player.tscn
+
   export-android:
     name: Android APK
     runs-on: ubuntu-latest

@@ -26,7 +26,15 @@ static func assemble(character_root: Node3D, race_id: String, gender: String, pr
 		push_error("❌ عرق غير معروف: %s — تم استخدام 'human' كبديل آمن" % race_id)
 		race_id = "human"
 
-	# أول موديل بشري حقيقي (Mixamo) — للبشر فقط حاليًا
+	# شخصية Quaternius (Universal Base Characters) + حركات UAL — الأساس الجديد لكل الأعراق في الـ MVP
+	if QuaterniusCharacter.has_assets():
+		var old_body := character_root.get_node_or_null("HumanBody")
+		if old_body:
+			old_body.free()
+		if QuaterniusCharacter.build(character_root, gender, appearance_seed) != null:
+			return
+
+	# احتياطي: موديل Mixamo البشري القديم
 	if race_id == "human" and _has_real_human_model():
 		_load_full_human_body(character_root, appearance_seed)
 		return
